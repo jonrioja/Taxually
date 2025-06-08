@@ -2,6 +2,8 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Taxually.TechnicalTest.Middleware;
 using Taxually.TechnicalTest.Services.Abstract;
+using Taxually.TechnicalTest.Services.Clients.Abstract;
+using Taxually.TechnicalTest.Services.Clients.Implementation;
 using Taxually.TechnicalTest.Services.Implementation;
 using Taxually.TechnicalTest.Services.Strategies.Abstract;
 using Taxually.TechnicalTest.Services.Strategies.Implementation;
@@ -19,6 +21,8 @@ builder.Services.AddScoped<IVatRegistrationService, VatRegistrationService>();
 builder.Services.AddScoped<IVatRegistrationStrategy, GbVatRegistrationStrategy>();
 builder.Services.AddScoped<IVatRegistrationStrategy, FrVatRegistrationStrategy>();
 builder.Services.AddScoped<IVatRegistrationStrategy, DeVatRegistrationStrategy>();
+builder.Services.AddScoped<ITaxuallyHttpClient, TaxuallyHttpClient>();
+builder.Services.AddScoped<ITaxuallyQueueClient, TaxuallyQueueClient>();
 
 
 
