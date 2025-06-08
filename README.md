@@ -1,3 +1,7 @@
+# Comments
+If this were a larger project, I would consider applying Onion Architecture together with CQRS and Domain-Driven Design (DDD) principles to promote clean separation of concerns, scalability, and a richer domain model.
+
+
 # Taxually technical test
 
 This solution contains an [API endpoint](https://github.com/Taxually/developer-test/blob/main/Taxually.TechnicalTest/Taxually.TechnicalTest/Controllers/VatRegistrationController.cs) to register a company for a VAT number. Different approaches are required based on the country where the company is based:
