@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Text.Json;
 
 namespace Taxually.TechnicalTest.Middleware
 {
@@ -13,45 +14,40 @@ namespace Taxually.TechnicalTest.Middleware
             _logger = logger;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task Invoke(HttpContext context)
         {
             try
             {
                 await _next(context);
             }
+            catch (NotSupportedException ex)
+            {
+                _logger.LogWarning(ex, "Client error: not supported");
+                await WriteProblemDetailsAsync(context, HttpStatusCode.BadRequest, "Invalid Request", ex.Message);
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unhandled exception caught by middleware");
-
-                context.Response.ContentType = "application/json";
-
-                int statusCode;
-                string message;
-
-                switch (ex)
-                {
-                    case NotSupportedException or ArgumentException:
-                        statusCode = StatusCodes.Status400BadRequest;
-                        message = ex.Message;
-                        break;
-
-                    default:
-                        statusCode = StatusCodes.Status500InternalServerError;
-                        message = "An unexpected error occurred. Please contact support.";
-                        break;
-                }
-
-                context.Response.StatusCode = statusCode;
-
-                var errorResponse = new
-                {
-                    Message = message,
-                    TraceId = context.TraceIdentifier
-                };
-
-                var json = JsonSerializer.Serialize(errorResponse);
-                await context.Response.WriteAsync(json);
+                _logger.LogError(ex, "Unhandled server error");
+                await WriteProblemDetailsAsync(context, HttpStatusCode.InternalServerError, "Unexpected Error", "An unexpected error occurred. Please contact support.");
             }
+        }
+
+        private static async Task WriteProblemDetailsAsync(HttpContext context, HttpStatusCode statusCode, string title, string detail)
+        {
+            context.Response.ContentType = "application/problem+json";
+            context.Response.StatusCode = (int)statusCode;
+
+            var problem = new
+            {
+                type = $"https://httpstatuses.com/{(int)statusCode}",
+                title,
+                status = (int)statusCode,
+                detail,
+                traceId = context.TraceIdentifier
+            };
+
+            var json = JsonSerializer.Serialize(problem);
+            await context.Response.WriteAsync(json);
         }
     }
 }
