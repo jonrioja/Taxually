@@ -3,6 +3,7 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc.Testing;
 using FluentAssertions;
 using Taxually.TechnicalTest.Enums;
+using Microsoft.Extensions.Configuration;
 
 namespace Taxually.TechnicalTest.IntegrationTests.Services;
 
@@ -12,9 +13,16 @@ public class VatRegistrationServiceIntegrationTests : IClassFixture<WebApplicati
 
     public VatRegistrationServiceIntegrationTests(WebApplicationFactory<Program> factory)
     {
+        var config = new ConfigurationBuilder()
+      .SetBasePath(AppContext.BaseDirectory)
+      .AddJsonFile("appsettings.json", optional: false)
+      .Build();
+
+        var baseUrl = config["IntegrationTests:BaseUrl"];
+
         _client = factory.CreateClient(new WebApplicationFactoryClientOptions
         {
-            BaseAddress = new Uri("https://localhost:7132")
+            BaseAddress = new Uri(baseUrl)
         });
     }
 
